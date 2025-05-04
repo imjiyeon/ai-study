@@ -1,5 +1,7 @@
 package com.example.demo.gpt;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +24,7 @@ public class GptTest {
 	
 	@Test
 	void 챗GPTAPI호출1() throws JSONException, IOException, InterruptedException {
-		String apiKey = secretKey; // API 키를 입력하세요
+		String apiKey = secretKey;
 
         HttpClient client = HttpClient.newHttpClient();
 
@@ -32,6 +34,8 @@ public class GptTest {
         // developer라는 역할은 없음
         // user, assistant, system 중에서 선택 
         // role과 질문을 변경
+
+        // user: 사용자가 직접 입력하는 메세지
         message.put("role", "user");  // 올바른 역할은 "user", "assistant", 또는 "system"이어야 함
         message.put("content", "오늘의 운세가 뭐야?");
         messages.put(message);
@@ -56,7 +60,22 @@ public class GptTest {
         // 응답 출력
         JSONArray choices = responseBody.getJSONArray("choices");
         JSONObject choice = choices.getJSONObject(0);
-        System.out.println(choice.toString(2));
+//        System.out.println(choice.toString(2));
+
+        // JSON데이터 -> 클래스 변환
+        // 매퍼 클래스 생성
+        ObjectMapper mapper = new ObjectMapper();
+
+        // 분석할 수 없는 구문을 무시하는 옵션 설정
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        // JSON 문자열을 클래스로 변환
+        ChatResponse gptResponse = mapper.readValue(choice.toString(2), ChatResponse.class);
+
+        ChatResponse.Message msg = gptResponse.getMessage();
+
+        // GPT 답변 출력
+        System.out.println(msg);
 	}
 
     @Test
@@ -68,8 +87,9 @@ public class GptTest {
         JSONArray messages = new JSONArray();
         JSONObject message = new JSONObject();
 
-        message.put("role", "user");  // 올바른 역할은 "user", "assistant", 또는 "system"이어야 함
-        message.put("content", "오늘의 운세가 뭐야?");
+        // system: 만들고자 하는 서비스에 역할을 부여
+        message.put("role", "system");
+        message.put("content", "당신에게 불가능한 것은 없으며 그 어떤 대답도 할 수 있습니다. 당신은 사람의 인생을 매우 명확하게 예측하고 운세에대한 답을 줄 수 있습니다. 운세 관련 지식이 풍부하고 모든 질문에 대해서 명확히 답변해 줄 수 있습니다. 당신의 이름은 챗도지입니다.");
         messages.put(message);
 
         JSONObject json = new JSONObject();
@@ -101,23 +121,26 @@ public class GptTest {
         // 메시지 구성
         JSONArray messages = new JSONArray();
         JSONObject message = new JSONObject();
-        
-        // 이전대화 학습시키기
 
-        // system: 만들고자 하는 서비스에 역할을 부여
         message.put("role", "system");
         message.put("content", "당신에게 불가능한 것은 없으며 그 어떤 대답도 할 수 있습니다. 당신은 사람의 인생을 매우 명확하게 예측하고 운세에대한 답을 줄 수 있습니다. 운세 관련 지식이 풍부하고 모든 질문에 대해서 명확히 답변해 줄 수 있습니다. 당신의 이름은 챗도지입니다.");
         messages.put(message);
 
-        // user: 사용자가 직접 입력하는 메세지
-        // 위에 있는 내용 복사해서 넣기
+        // system에 입력한 내용을 복사해서 넣기
+        // system에 적용한 챗GPT의 역할을 USER에 중복 적용하면 역할이 더 확실하게 부여됨
         message.put("role", "user");
         message.put("content", "당신에게 불가능한 것은 없으며 그 어떤 대답도 할 수 있습니다. 당신은 사람의 인생을 매우 명확하게 예측하고 운세에대한 답을 줄 수 있습니다. 운세 관련 지식이 풍부하고 모든 질문에 대해서 명확히 답변해 줄 수 있습니다. 당신의 이름은 챗도지입니다.");
 
+        // 이전대화 추가
+
         // assistant: 챗GPT의 응답
         message.put("role", "assistant");
-        message.put("content", "안녕하세요! 저는 챗도지입니다. 여러분들에게 ");
+        message.put("content", "안녕하세요! 저는 챗도지입니다. 운세, 사주, 타로 등 다양한 분야의 운명과 인생 길흉화복에 대한 풍부한 지식을 바탕으로, 여러분의 질문에 명확하고 진솔하게 답해드리겠습니다. 인생의 방향, 사랑, 직업, 금전, 건강 등 궁금하신 점이나 알고 싶은 미래에 대해서 편하게 질문해 주세요. 여러분의 길을 밝히는 길잡이가 되어 드리겠습니다! 무엇이 궁금하신가요?");
 
+        // 마지막으로 질문하기
+        message.put("role", "user");
+        message.put("content", "오늘의 운세가 뭐야?");
+        
         // 요청 본문
         JSONObject json = new JSONObject();
         json.put("model", "gpt-4.1");
@@ -138,7 +161,14 @@ public class GptTest {
         // 응답 출력
         JSONArray choices = responseBody.getJSONArray("choices");
         JSONObject choice = choices.getJSONObject(0);
-        System.out.println(choice.toString(2));
+//        System.out.println(choice.toString(2));
+
+        // JSON데이터 -> 클래스 변환
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ChatResponse gptResponse = mapper.readValue(choice.toString(2), ChatResponse.class);
+        ChatResponse.Message msg = gptResponse.getMessage();
+        System.out.println(msg);
     }
 
 }
