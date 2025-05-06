@@ -1,4 +1,4 @@
-package com.example.demo.gpt;
+package com.example.demo.gpt.dto;
 
 import lombok.*;
 
