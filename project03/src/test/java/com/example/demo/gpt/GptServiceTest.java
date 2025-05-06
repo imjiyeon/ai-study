@@ -14,9 +14,8 @@ public class GptServiceTest {
 
     @Test
     void API호출테스트(){
-        ChatResponse response = service.callGptApi();
-        ChatResponse.Message msg = response.getMessage();
-        System.out.println(msg);
+        String response = service.callGptApi();
+        System.out.println(response);
     }
 
 }

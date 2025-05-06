@@ -21,7 +21,7 @@ public class GptService {
     @Value("${apikey}")
     String key;
 
-    public ChatResponse callGptApi(){
+    public String callGptApi(){
 
         String apiKey = key;
 
@@ -111,8 +111,13 @@ public class GptService {
             throw new RuntimeException(e);
         }
 
+        // 답변만 꺼내기
+        ChatResponse.Message responseMessage = gptResponse.getMessage();
+
+        String content = responseMessage.getContent();
+
         // GPT 답변 반환
-        return gptResponse;
+        return content;
     }
 
 
