@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>운세 보는 챗도지</title>
+
+<style>
+	body {
+	  background-color: #f0f0f0;
+	  padding: 20px;
+	}
+	#chat-box {
+	  width: 100%;
+	  max-width: 600px;
+	  height: 400px;
+	  background-color: white;
+	  border: 1px solid lightgray;
+	  border-radius: 8px;
+	  padding: 10px;
+	}
+	#input-div{
+	  width: 100%;
+	  max-width: 600px;
+	  padding: 10px;
+	}
+	#msg-input {
+	  width: 70%;
+	  padding: 10px;
+	  border: 1px solid lightgray;
+	  border-radius: 20px;
+	}
+	#send-button {
+	  background-color: deepskyblue;
+	  color: white;
+	  border: none;
+	  border-radius: 20px;
+	  cursor: pointer;
+	  margin-left: 10px;
+	  padding: 10px;
+	}
+	#send-button:hover {
+	  background-color: dodgerblue;
+	}
+	
+	/* 사용자 메세지 */
+	.user {
+		background-color: #e2f7fd; /* 하늘색 */
+		text-align: right;
+		margin: 8px 0; /* 위 아래 간격 */
+	}
+	/* 챗봇 메세지 */
+	.bot {
+		background-color: #f1f1f1; /* 회색 */
+		text-align: left;
+		margin: 8px 0; /* 위 아래 간격 */
+	}
+	
+</style>
+
+</head>
+<body>
+
+	<!-- 채팅창에 사용자 메세지와 답변 출력하기 -->
+	
+	<h2>운세 보는 챗도지</h2>
+	<div id="chat-box"></div>
+	<div id="input-div">
+	  <input type="text" id="msg-input" placeholder="메세지를 입력하세요..">
+	  <button id="send-button" onclick="postJSON()">보내기</button>
+	</div>
+	
+	<script type="text/javascript">
+		
+		async function postJSON() {
+			
+			const data = { username: "example" };
+			
+			// 메시지 입력필드 가져오기
+			const input = document.getElementById('msg-input');
+			const text = input.value;
+			
+			// 사용자 말풍선 생성
+			const msg = document.createElement('div');
+			msg.textContent = text;
+			// 스타일을 꾸미기 위해 클래스 이름 추가
+			msg.classList.add('user');
+			
+			// 채팅창에 사용자 메세지 추가
+			const chatBox = document.getElementById('chat-box');
+			chatBox.appendChild(msg);
+			
+			// 메시지 입력필드 초기화
+			input.value = '';
+
+			try {
+			    const response = await fetch("/fortuneTell", {
+			      method: "POST",
+			      headers: {
+			        "Content-Type": "application/json",
+			      },
+			      body: JSON.stringify(data),
+			    });
+	
+			    const result = await response.text();
+			    console.log("성공:", result);
+			    
+				// 봇 말풍선 생성
+				const msg = document.createElement('div');
+				msg.textContent = result;
+				
+				// 스타일을 꾸미기 위해 클래스 이름 추가
+				msg.classList.add('bot');
+				
+				// 채팅창에 챗봇 추가
+				chatBox.appendChild(msg);
+							    
+
+			  } catch (error) {
+			    console.error("실패:", error);
+			  }
+		  }
+
+	</script>
+	
+</body>
+</html>
