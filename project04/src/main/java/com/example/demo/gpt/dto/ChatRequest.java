@@ -13,11 +13,11 @@ import java.util.Stack;
 @Builder
 public class ChatRequest {
 	
-	// list,map 같은 stack 자료구조
-	// 데이터를 꺼낼 때, 나중에 추가된 데이터를 먼저 꺼냄
-	Stack<String> userMsg;
+	// 사용자 메세지 (목록)
+	List<String> userMsg;
 	
-	Stack<String> assistantMsg;
+	// 챗봇 응답 (목록)
+	List<String> botMsg;
 
 }
 

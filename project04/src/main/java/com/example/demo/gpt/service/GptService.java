@@ -15,6 +15,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.Stack;
 
 @Service
@@ -141,29 +142,32 @@ public class GptService {
 		// 프론트엔드에서 전달받은 채팅 데이터로 객체 만들기
 		// 반복문을 사용해서 누적된 데이터 꺼내기
 		// message에 저장되는 객체는 { role:"역할", content:"내용" } 형태이다
-	    Stack<String> userMsg = chatRequest.getUserMsg();
-	    Stack<String> assistantMsg = chatRequest.getAssistantMsg();
+	    List<String> userMsg = chatRequest.getUserMsg();
+	    List<String> botMsg = chatRequest.getBotMsg();
 		
-		// message에 대화 담기
-		while(userMsg.size() > 0) {
-			// 사용자 메세지 저장
-	        JSONObject message1 = new JSONObject();
-	        message1.put("role", "user");
-	        // pop함수를 사용해서 메세지 꺼내기
-	        // pop함수는 데이터를 꺼내면 자료구조에서 데이터가 삭제됨
-	        // 모든 메세지를 꺼낼때까지 반복문을 반복
-	        message1.put("content", userMsg.pop());
-	        messages.put(message1);
-	        
-	        // 챗봇 응답 저장
-	        // 응답이 없을 수 있기 때문에 크기를 확인
-	        if(assistantMsg.size() > 0) {
-		        JSONObject message2 = new JSONObject();
-		        message2.put("role", "assistant");
-		        message2.put("content", assistantMsg.pop());
-		        messages.put(message2); 
-	        }
-
+		// messages에 대화 담기
+	    for(int i=0; i<userMsg.size(); i++) {
+			
+			// 사용자 메세지
+			JSONObject user = new JSONObject();
+			user.put("role", "user");
+			user.put("content", userMsg.get(i));
+			messages.put(user);
+			
+			// 챗봇 응답
+			// 응답이 없을 수 있기 때문에 크기 확인 필요
+			// user: ['안녕', '오늘의 운세가 뭐야?'] (2)
+			// bot: ['안녕하세요~저는 챗도지입니다'] (1)
+			// index가 배열의 크기보다 작을 때 까지
+			// i: 0, 1
+			// size: 1
+			if(botMsg.size() > 0 && i<botMsg.size() ) {
+				JSONObject bot = new JSONObject();
+				bot.put("role", "assistant");
+				bot.put("content", botMsg.get(i));
+				messages.put(bot);
+			}
+			
 		}
 		
 		JSONObject json = new JSONObject();
